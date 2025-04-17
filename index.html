@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>نقطة بنقطة</title>
+  <script src="https://www.desmos.com/api/v1.10/calculator.js?apiKey=dcb31709b452b1cf9dc26972add0fda6"></script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
+  <style>
+    body {
+      font-family: 'Cairo', sans-serif;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    #calculator {
+      height: 500px;
+    }
+    #error-toast {
+      transition: all 0.3s ease-in-out;
+    }
+    .dark-mode {
+      background-color: #1f2937;
+      color: #f9fafb;
+    }
+    .dark-mode .bg-white {
+      background-color: #374151 !important;
+    }
+    .dark-mode .text-blue-700 {
+      color: #60a5fa !important;
+    }
+    .dark-mode textarea, 
+    .dark-mode .border {
+      background-color: #4b5563;
+      color: white;
+    }
+    .dark-mode footer {
+      color: #9ca3af;
+    }
+  </style>
+</head>
+<body class="text-right p-6 bg-gray-50" id="body">
+
+  <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-lg p-6 space-y-6">
+    <div class="flex justify-between items-center">
+      <h1 class="text-3xl font-bold text-blue-700">نقطة بنقطة</h1>
+      <button onclick="toggleDarkMode()" class="text-sm text-gray-600 bg-gray-200 px-3 py-1 rounded-full hover:bg-gray-300">
+        🌓 وضع الليل
+      </button>
+    </div>
+    
+    <div>
+      <label for="equations" class="block text-lg font-semibold mb-2">أدخل المعادلات (واحدة في كل سطر):</label>
+      <textarea id="equations" rows="4" placeholder="مثال:\nص = س^2 - 3\nص > 2س + 1"
+        class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+      <p id="equation-count" class="text-sm text-gray-500 mt-2">عدد المعادلات: 0</p>
+
+      <div class="flex items-center space-x-2 text-sm text-gray-600 mt-2">
+        <input type="checkbox" id="auto-plot" class="form-checkbox text-blue-600">
+        <label for="auto-plot">رسم تلقائي أثناء الكتابة</label>
+      </div>
+    </div>
+
+    <div class="flex justify-center gap-4">
+      <button onclick="plotEquations()"
+        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-full shadow">
+        رسم المعادلات
+      </button>
+
+      <button onclick="clearEquations()"
+        class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-full shadow">
+        مسح الرسومات
+      </button>
+    </div>
+
+    <div id="calculator" class="rounded-lg border shadow-inner bg-white"></div>
+  </div>
+
+  <div id="error-toast" class="hidden fixed bottom-4 right-4 bg-red-500 text-white py-2 px-4 rounded shadow-lg text-sm z-50">
+    ⚠️ يوجد خطأ في إحدى المعادلات. يرجى التحقق منها.
+  </div>
+
+  <footer class="mt-10 text-center text-xs text-gray-400">
+    موقع <span class="font-semibold">نقطة بنقطة</span> تم تطويره من الطالب عمر أبو بكر ✨
+  </footer>
+
+  <script>
+    let calculator;
+
+    function initializeCalculator() {
+      const elt = document.getElementById('calculator');
+      calculator = Desmos.GraphingCalculator(elt, {
+        expressions: true,
+        settingsMenu: false,
+        keypad: true,
+        language: 'ar'
+      });
+    }
+
+    function convertArabicToLatex(arabicInput) {
+  let converted = arabicInput
+    .replace(/س/g, 'x')
+    .replace(/ص/g, 'y')
+    .replace(/\^/g, '^')
+    .replace(/[\u200E\u200F]/g, '')
+    .trim();
+
+  converted = converted
+    .replace(/(x)\s*<=\s*([^\s]+)/g, '$1 \\ge $2') 
+    .replace(/(x)\s*>=\s*([^\s]+)/g, '$1 \\le $2')
+    .replace(/(x)\s*<\s*([^\s]+)/g, '$1 > $2') 
+    .replace(/(x)\s*>\s*([^\s]+)/g, '$1 < $2');    
+
+  return converted;
+}
+
+
+    function plotEquations() {
+      calculator.setExpressions([]);
+      const input = document.getElementById('equations').value.trim();
+      const lines = input.split('\n');
+      let hasError = false;
+
+      lines.forEach((line, index) => {
+        const converted = convertArabicToLatex(line);
+        if (converted) {
+          try {
+            calculator.setExpression({
+              id: 'eq' + index,
+              latex: converted
+            });
+          } catch (e) {
+            hasError = true;
+          }
+        }
+      });
+
+      if (hasError) showErrorToast();
+    }
+
+    function clearEquations() {
+      document.getElementById('equations').value = '';
+      document.getElementById('equation-count').innerText = "عدد المعادلات: 0";
+
+      const all = calculator.getExpressions();
+      all.forEach(expr => calculator.removeExpression(expr));
+    }
+
+    function updateEquationCount() {
+      const lines = document.getElementById('equations').value.trim().split('\n').filter(line => line.trim() !== '');
+      document.getElementById('equation-count').innerText = `عدد المعادلات: ${lines.length}`;
+    }
+
+    function showErrorToast() {
+      const toast = document.getElementById('error-toast');
+      toast.classList.remove('hidden');
+      setTimeout(() => toast.classList.add('hidden'), 3000);
+    }
+
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark-mode');
+    }
+
+    window.onload = () => {
+      initializeCalculator();
+      updateEquationCount();
+    };
+
+    document.getElementById('equations').addEventListener('input', () => {
+      updateEquationCount();
+      if (document.getElementById('auto-plot').checked) {
+        plotEquations();
+      }
+    });
+  </script>
+</body>
+</html>
+
+
