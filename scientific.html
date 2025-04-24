@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>الآلة الحاسبة العلمية</title>
+  <!-- Use the correct minified math.js script -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.0.1/math.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
+  <style>
+    body {
+      font-family: 'Cairo', sans-serif;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    .dark-mode {
+      background-color: #1f2937;
+      color: #f9fafb;
+    }
+    .dark-mode .bg-white {
+      background-color: #374151 !important;
+    }
+    .dark-mode .text-blue-700 {
+      color: #60a5fa !important;
+    }
+    .dark-mode .text-gray-500 {
+      color: #d1d5db;
+    }
+    .dark-mode textarea, 
+    .dark-mode .border {
+      background-color: #4b5563;
+      color: white;
+    }
+    .dark-mode footer {
+      color: #9ca3af;
+    }
+
+    /* Calculator style */
+    .calculator-button {
+      background-color: #f3f4f6;
+      border: 1px solid #e5e7eb;
+      color: #1f2937;
+      font-size: 1.5rem;
+      padding: 1.5rem;
+      width: 80px;
+      height: 80px;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+    }
+
+    .calculator-button:hover {
+      background-color: #60a5fa;
+      color: white;
+      cursor: pointer;
+    }
+
+    .calculator-button:active {
+      background-color: #2563eb;
+    }
+
+    .calculator-button:disabled {
+      background-color: #d1d5db;
+      cursor: not-allowed;
+    }
+
+    .display {
+      background-color: #f9fafb;
+      border: 1px solid #e5e7eb;
+      font-size: 2.5rem;
+      padding: 1.5rem;
+      width: 100%;
+      text-align: right;
+      border-radius: 12px;
+      margin-bottom: 1rem;
+      color: #1f2937;
+    }
+
+    .result {
+      font-size: 2.5rem;
+      margin-top: 1.5rem;
+      padding: 1.5rem;
+      background-color: #e5e7eb;
+      border-radius: 12px;
+      color: #1f2937;
+    }
+
+    /* Footer style */
+    footer {
+      font-size: 0.85rem;
+      text-align: center;
+      margin-top: 2rem;
+      color: #6b7280;
+    }
+
+    .header-button {
+      font-size: 1rem;
+      color: #1f2937;
+      padding: 0.75rem 1.5rem;
+      background-color: #e5e7eb;
+      border: none;
+      border-radius: 6px;
+      transition: all 0.3s ease;
+    }
+
+    .header-button:hover {
+      background-color: #60a5fa;
+      color: white;
+    }
+
+    .header-button:active {
+      background-color: #2563eb;
+    }
+  </style>
+</head>
+<body class="text-right p-6 bg-gray-50" id="body">
+
+  <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-lg p-6 space-y-6">
+    <div class="flex justify-between items-center">
+      <h1 class="text-3xl font-bold text-blue-700">الآلة الحاسبة العلمية</h1>
+      <button onclick="toggleDarkMode()" class="header-button">
+        🌓 وضع الليل
+      </button>
+    </div>
+
+    <div class="bg-blue-50 p-4 rounded-lg text-sm leading-relaxed text-gray-800">
+      <h2 class="text-lg font-semibold text-blue-700 mb-2">حول الموقع</h2>
+      <p>
+        موقع <span class="font-bold">الآلة الحاسبة العلمية</span> هو أداة لحساب المعادلات الرياضية باستخدام العمليات الحسابية المختلفة مثل الجمع والطرح والضرب والقسمة والمعادلات مثل الجذور والدوال مثل جيب وجيب التمام وغيرها.
+      </p>
+    </div>
+
+    <!-- Calculator display -->
+    <div class="display" id="display">0</div>
+
+    <!-- Calculator buttons -->
+    <div class="grid grid-cols-4 gap-6 mt-6">
+      <button class="calculator-button" onclick="appendToDisplay('7')">7</button>
+      <button class="calculator-button" onclick="appendToDisplay('8')">8</button>
+      <button class="calculator-button" onclick="appendToDisplay('9')">9</button>
+      <button class="calculator-button" onclick="appendToDisplay('/')">/</button>
+      
+      <button class="calculator-button" onclick="appendToDisplay('4')">4</button>
+      <button class="calculator-button" onclick="appendToDisplay('5')">5</button>
+      <button class="calculator-button" onclick="appendToDisplay('6')">6</button>
+      <button class="calculator-button" onclick="appendToDisplay('*')">*</button>
+
+      <button class="calculator-button" onclick="appendToDisplay('1')">1</button>
+      <button class="calculator-button" onclick="appendToDisplay('2')">2</button>
+      <button class="calculator-button" onclick="appendToDisplay('3')">3</button>
+      <button class="calculator-button" onclick="appendToDisplay('-')">-</button>
+
+      <button class="calculator-button" onclick="appendToDisplay('0')">0</button>
+      <button class="calculator-button" onclick="appendToDisplay('.')">.</button>
+      <button class="calculator-button" onclick="appendToDisplay('(')">(</button>
+      <button class="calculator-button" onclick="appendToDisplay(')')">)</button>
+    </div>
+
+    <div class="grid grid-cols-4 gap-6 mt-6">
+      <button class="calculator-button" onclick="appendToDisplay('sin(')">sin</button>
+      <button class="calculator-button" onclick="appendToDisplay('cos(')">cos</button>
+      <button class="calculator-button" onclick="appendToDisplay('tan(')">tan</button>
+      <button class="calculator-button" onclick="clearDisplay()">C</button>
+
+      <button class="calculator-button" onclick="appendToDisplay('sqrt(')">√</button>
+      <button class="calculator-button" onclick="appendToDisplay('^')">^</button>
+      <button class="calculator-button" onclick="calculate()">=</button>
+      <button class="calculator-button" onclick="appendToDisplay('+')">+</button>
+    </div>
+
+  </div>
+
+  <footer class="mt-10 text-center text-xs text-gray-400">
+    آلة حاسبة علمية من الطالب عمر أبو بكر
+  </footer>
+
+  <script>
+    let displayValue = "0";
+
+    function toggleDarkMode() {
+      const body = document.getElementById('body');
+      body.classList.toggle('dark-mode');
+    }
+
+    function appendToDisplay(value) {
+      if (displayValue === "0" || displayValue === "خطأ") {
+        displayValue = value;
+      } else {
+        displayValue += value;
+      }
+      document.getElementById('display').textContent = displayValue;
+    }
+
+    function clearDisplay() {
+      displayValue = "0";
+      document.getElementById('display').textContent = displayValue;
+    }
+
+    function calculate() {
+      try {
+        const result = math.evaluate(displayValue);
+        document.getElementById('result').textContent = result;
+        displayValue = result.toString();
+      } catch (error) {
+        document.getElementById('result').textContent = 'خطأ';
+        displayValue = "خطأ";
+      }
+      document.getElementById('display').textContent = displayValue;
+    }
+  </script>
+
+</body>
+</html>
