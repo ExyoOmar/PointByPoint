@@ -4,12 +4,21 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>الآلة الحاسبة العلمية</title>
-  <!-- Use the correct minified math.js script -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.0.1/math.js"></script>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
   <style>
+    :root {
+      --main-bg: #f0f4f8;
+      --text-color: #1f2937;
+      --btn-bg: #f3f4f6;
+      --btn-hover-bg: #60a5fa;
+      --btn-active-bg: #2563eb;
+      --display-bg: #f9fafb;
+      --display-color: #1f2937;
+    }
     body {
       font-family: 'Cairo', sans-serif;
+      background-color: var(--main-bg);
       transition: background-color 0.3s ease, color 0.3s ease;
     }
     .dark-mode {
@@ -33,12 +42,10 @@
     .dark-mode footer {
       color: #9ca3af;
     }
-
-    /* Calculator style */
     .calculator-button {
-      background-color: #f3f4f6;
+      background-color: var(--btn-bg);
       border: 1px solid #e5e7eb;
-      color: #1f2937;
+      color: var(--text-color);
       font-size: 1.5rem;
       padding: 1.5rem;
       width: 80px;
@@ -46,24 +53,20 @@
       border-radius: 12px;
       transition: all 0.3s ease;
     }
-
     .calculator-button:hover {
-      background-color: #60a5fa;
+      background-color: var(--btn-hover-bg);
       color: white;
       cursor: pointer;
     }
-
     .calculator-button:active {
-      background-color: #2563eb;
+      background-color: var(--btn-active-bg);
     }
-
     .calculator-button:disabled {
       background-color: #d1d5db;
       cursor: not-allowed;
     }
-
     .display {
-      background-color: #f9fafb;
+      background-color: var(--display-bg);
       border: 1px solid #e5e7eb;
       font-size: 2.5rem;
       padding: 1.5rem;
@@ -71,48 +74,33 @@
       text-align: right;
       border-radius: 12px;
       margin-bottom: 1rem;
-      color: #1f2937;
+      color: var(--display-color);
     }
-
-    .result {
-      font-size: 2.5rem;
-      margin-top: 1.5rem;
-      padding: 1.5rem;
-      background-color: #e5e7eb;
-      border-radius: 12px;
-      color: #1f2937;
-    }
-
-    /* Footer style */
     footer {
       font-size: 0.85rem;
       text-align: center;
       margin-top: 2rem;
       color: #6b7280;
     }
-
     .header-button {
       font-size: 1rem;
-      color: #1f2937;
+      color: var(--text-color);
       padding: 0.75rem 1.5rem;
       background-color: #e5e7eb;
       border: none;
       border-radius: 6px;
       transition: all 0.3s ease;
     }
-
     .header-button:hover {
-      background-color: #60a5fa;
+      background-color: var(--btn-hover-bg);
       color: white;
     }
-
     .header-button:active {
-      background-color: #2563eb;
+      background-color: var(--btn-active-bg);
     }
   </style>
 </head>
-<body class="text-right p-6 bg-gray-50" id="body">
-
+<body class="text-right p-6">
   <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-lg p-6 space-y-6">
     <div class="flex justify-between items-center">
       <h1 class="text-3xl font-bold text-blue-700">الآلة الحاسبة العلمية</h1>
@@ -122,22 +110,20 @@
     </div>
 
     <div class="bg-blue-50 p-4 rounded-lg text-sm leading-relaxed text-gray-800">
-      <h2 class="text-lg font-semibold text-blue-700 mb-2">حول الموقع</h2>
+      <h2 class="text-lg font-semibold text-blue-700 mb-2">نبذة عن الآلة الحاسبة</h2>
       <p>
-        موقع <span class="font-bold">الآلة الحاسبة العلمية</span> هو أداة لحساب المعادلات الرياضية باستخدام العمليات الحسابية المختلفة مثل الجمع والطرح والضرب والقسمة والمعادلات مثل الجذور والدوال مثل جيب وجيب التمام وغيرها.
+        هذه الآلة الحاسبة العلمية تساعدك على إجراء العمليات الرياضية المعقدة مثل الجذور والدوال المثلثية وغيرها.
       </p>
     </div>
 
-    <!-- Calculator display -->
     <div class="display" id="display">0</div>
 
-    <!-- Calculator buttons -->
     <div class="grid grid-cols-4 gap-6 mt-6">
       <button class="calculator-button" onclick="appendToDisplay('7')">7</button>
       <button class="calculator-button" onclick="appendToDisplay('8')">8</button>
       <button class="calculator-button" onclick="appendToDisplay('9')">9</button>
       <button class="calculator-button" onclick="appendToDisplay('/')">/</button>
-      
+
       <button class="calculator-button" onclick="appendToDisplay('4')">4</button>
       <button class="calculator-button" onclick="appendToDisplay('5')">5</button>
       <button class="calculator-button" onclick="appendToDisplay('6')">6</button>
@@ -166,6 +152,11 @@
       <button class="calculator-button" onclick="appendToDisplay('+')">+</button>
     </div>
 
+    <div class="mt-6 text-center">
+      <button onclick="changeColor()" class="header-button">
+        تغيير الألوان
+      </button>
+    </div>
   </div>
 
   <footer class="mt-10 text-center text-xs text-gray-400">
@@ -176,7 +167,7 @@
     let displayValue = "0";
 
     function toggleDarkMode() {
-      const body = document.getElementById('body');
+      const body = document.body;
       body.classList.toggle('dark-mode');
     }
 
@@ -197,15 +188,18 @@
     function calculate() {
       try {
         const result = math.evaluate(displayValue);
-        document.getElementById('result').textContent = result;
         displayValue = result.toString();
       } catch (error) {
-        document.getElementById('result').textContent = 'خطأ';
         displayValue = "خطأ";
       }
       document.getElementById('display').textContent = displayValue;
     }
-  </script>
 
+    function changeColor() {
+      const colors = ['#f0f4f8', '#e4f9f5', '#e9f7fc', '#f3f6f8', '#fff0f5'];
+      const randomColor = colors[Math.floor(Math.random() * colors.length)];
+      document.documentElement.style.setProperty('--main-bg', randomColor);
+    }
+  </script>
 </body>
 </html>
