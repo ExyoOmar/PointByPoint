@@ -1,282 +1,0 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>نقطة بنقطة</title>
-  <script src="https://www.desmos.com/api/v1.10/calculator.js?apiKey=dcb31709b452b1cf9dc26972add0fda6"></script>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
-  <style>
-    body {
-      font-family: 'Cairo', sans-serif;
-      transition: background-color 0.3s ease, color 0.3s ease;
-    }
-    #calculator {
-      height: 500px;
-    }
-    #error-toast {
-      transition: all 0.3s ease-in-out;
-    }
-    .dark-mode {
-      background-color: #1f2937;
-      color: #f9fafb;
-    }
-    .dark-mode .bg-white {
-      background-color: #374151 !important;
-    }
-    .dark-mode .text-blue-700 {
-      color: #60a5fa !important;
-    }
-    .dark-mode textarea, 
-    .dark-mode .border {
-      background-color: #4b5563;
-      color: white;
-    }
-    .dark-mode footer {
-      color: #9ca3af;
-    }
-  </style>
-</head>
-<body class="text-right p-6 bg-gray-50" id="body">
-
-  <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-lg p-6 space-y-6">
-    <div class="flex justify-between items-center">
-      <h1 class="text-3xl font-bold text-blue-700">نقطة بنقطة</h1>
-      <button onclick="toggleDarkMode()" class="text-sm text-gray-600 bg-gray-200 px-3 py-1 rounded-full hover:bg-gray-300">
-        🌓 وضع الليل
-      </button>
-    </div>
-
-  
-<div class="mt-6 bg-blue-50 p-4 rounded-lg text-sm leading-relaxed text-gray-800">
-  <h2 class="text-lg font-semibold text-blue-700 mb-2">حول الموقع</h2>
-  <p>
-    موقع <span class="font-bold">نقطة بنقطة</span> هو أداة رسومية تعليمية تفاعلية لطلاب مدرسة الإسراء النموذجية للبنين بإعداد الطالب عمر أبو بكر تهدف إلى تسهيل فهم المعادلات الرياضية للطلاب من خلال تمثيلها بيانياً بطريقة سلسة وباللغة العربية. تم تصميمه ليكون بسيطاً ومباشراً ليتناسب مع مناهجنا الدراسية ويخدم الطلبة والمعلمين على حد سواء.
-  </p>
-</div>
-
-    
-    <div>
-      <label for="equations" class="block text-lg font-semibold mb-2">أدخل المعادلات (واحدة في كل سطر):</label>
-      <textarea id="equations" rows="4" placeholder="مثال:\nص = س^2 - 3\nص > 2س + 1"
-        class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
-      <p id="equation-count" class="text-sm text-gray-500 mt-2">عدد المعادلات: 0</p>
-
-      <div class="flex items-center space-x-2 text-sm text-gray-600 mt-2">
-        <input type="checkbox" id="auto-plot" class="form-checkbox text-blue-600">
-        <label for="auto-plot">رسم تلقائي أثناء الكتابة</label>
-      </div>
-    </div>
-
-    <div class="flex justify-center gap-4">
-      <button onclick="plotEquations()"
-        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-full shadow">
-        رسم المعادلات
-      </button>
-
-      <button onclick="clearEquations()"
-        class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-full shadow">
-        مسح الرسومات
-      </button>
-    </div>
-
-    <div class="flex justify-center gap-4">
-      <button onclick="redrawEquations()"
-        class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-6 rounded-full shadow">
-        إعادة الرسم
-      </button>
-    
-      <button onclick="downloadImage()"
-        class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-full shadow">
-        حفظ كصورة
-      </button>
-    
-      <button onclick="exportEquations()"
-        class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-6 rounded-full shadow">
-        تصدير المعادلات
-      </button>
-    </div>
-    
-    <div class="mt-4 text-sm text-gray-600 text-center">
-      <p>مميزات النسخة 1.3: إعادة الرسم، حفظ كصورة، تصدير المعادلات، ألوان مخصصة </p>
-    </div>
-
-    <div id="calculator" class="rounded-lg border shadow-inner bg-white"></div>
-  </div>
-
-  <div id="error-toast" class="hidden fixed bottom-4 right-4 bg-red-500 text-white py-2 px-4 rounded shadow-lg text-sm z-50">
-    ⚠️ يوجد خطأ في إحدى المعادلات. يرجى التحقق منها.
-  </div>
-
-  <footer class="mt-10 text-center text-xs text-gray-400">
-    موقع <span class="font-semibold">نقطة بنقطة</span> تم تطويره من الطالب عمر أبو بكر ✨
-  </footer>
-
-  <script>
-    let calculator;
-
-    function initializeCalculator() {
-      const elt = document.getElementById('calculator');
-      calculator = Desmos.GraphingCalculator(elt, {
-        expressions: true,
-        settingsMenu: false,
-        keypad: true,
-        language: 'ar'
-      });
-    }
-
-    function convertArabicToLatex(arabicInput) {
-      let converted = arabicInput
-        .replace(/[\u200E\u200F]/g, '') 
-        .replace(/س/g, 'x')
-        .replace(/ص/g, 'y')
-        .replace(/\^/g, '^');
-
-   
-      converted = converted
-        .replace(/([xy])\s*>=\s*([^\n]+)/g, '$1 \\ge $2')
-        .replace(/([xy])\s*<=\s*([^\n]+)/g, '$1 \\le $2')
-        .replace(/([xy])\s*>\s*([^\n]+)/g, '$1 > $2')
-        .replace(/([xy])\s*<\s*([^\n]+)/g, '$1 < $2')
-        .replace(/=/g, '=');
-
-      return converted.trim();
-    }
-
-    function plotEquations() {
-      calculator.setExpressions([]);
-      const input = document.getElementById('equations').value.trim();
-      const lines = input.split('\n');
-      let hasError = false;
-
-      lines.forEach((line, index) => {
-        const converted = convertArabicToLatex(line);
-        if (converted) {
-          try {
-            calculator.setExpression({
-              id: 'eq' + index,
-              latex: converted
-            });
-          } catch (e) {
-            hasError = true;
-          }
-        }
-      });
-
-      if (hasError) showErrorToast();
-    }
-
-    function clearEquations() {
-      document.getElementById('equations').value = '';
-      document.getElementById('equation-count').innerText = "عدد المعادلات: 0";
-
-      const all = calculator.getExpressions();
-      all.forEach(expr => calculator.removeExpression(expr));
-    }
-
-    function updateEquationCount() {
-      const lines = document.getElementById('equations').value.trim().split('\n').filter(line => line.trim() !== '');
-      document.getElementById('equation-count').innerText = `عدد المعادلات: ${lines.length}`;
-    }
-
-    function showErrorToast() {
-      const toast = document.getElementById('error-toast');
-      toast.classList.remove('hidden');
-      setTimeout(() => toast.classList.add('hidden'), 3000);
-    }
-
-    function toggleDarkMode() {
-      document.body.classList.toggle('dark-mode');
-    }
-
-    window.onload = () => {
-      initializeCalculator();
-      updateEquationCount();
-    };
-
-    document.getElementById('equations').addEventListener('input', () => {
-      updateEquationCount();
-      if (document.getElementById('auto-plot').checked) {
-        plotEquations();
-      }
-    });
-
-    function redrawEquations() {
-    plotEquations();
-  }
-
-  function redrawEquations() {
-    if (calculator) plotEquations();
-  }
-
-  function downloadImage() {
-    if (!calculator) return;
-
-    setTimeout(() => {
-      try {
-        const img = calculator.screenshot({ width: 600, height: 400 });
-        const a = document.createElement('a');
-        a.href = img;
-        a.download = 'nqtah-graph.png';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-      } catch (e) {
-        alert('حدث خطأ أثناء حفظ الصورة');
-      }
-    }, 100);
-  }
-
-  function exportEquations() {
-    const input = document.getElementById('equations').value.trim();
-    const blob = new Blob([input], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'معادلات.txt';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }
-  function getRandomColor() {
-  const colors = [
-    '#1f77b4', '#ff7f0e', '#2ca02c', '#d62728',
-    '#9467bd', '#8c564b', '#e377c2', '#7f7f7f',
-    '#17becf', '#bcbd22', '#f39c12', '#e74c3c'
-  ];
-  return colors[Math.floor(Math.random() * colors.length)];
-}
-
-function redrawEquations() {
-  const input = document.getElementById('equations').value.trim();
-  if (!input) return;
-
-  calculator.setExpressions([]);
-  const lines = input.split('\n');
-  let hasError = false;
-
-  lines.forEach((line, index) => {
-    const converted = convertArabicToLatex(line);
-    if (converted) {
-      try {
-        calculator.setExpression({
-          id: 'eq' + index, 
-          latex: converted,
-          color: getRandomColor()
-        });
-      } catch (e) {
-        hasError = true;
-      }
-    }
-  });
-
-  if (hasError) showErrorToast();
-}
-
-
-  </script>
-</body>
-</html>
-
-
